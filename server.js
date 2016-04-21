@@ -1,14 +1,23 @@
 var express = require('express');
-var bodyParser = require("body-parser");
 var app = express();
 
+// bodyparser is used to parse html requests
+var bodyParser = require("body-parser");
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+
+// set up database to store login credential
 var mongojs = require('mongojs')
 var db = mongojs('localhost:27017/solidware_mini_db', ['users'])
 
+// jwt is used to create and manage session token
+var jwt = require('jwt-simple');
+// TODO(wonjohn): separate this secret out of git respository.
+app.set('jwtTokenSecret', 'idU093FHeqN2L1MNC7');
 
-
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
+// this is used to create and manage cookie
+var cookieParser = require('cookie-parser')
+app.use(cookieParser());
 
 app.get('/', function (req, res) {
     res.sendFile(__dirname + '/index.html');
@@ -46,14 +55,29 @@ app.post('/login', function(req, res){
 
     login_success(username, password, function(success, name) {
         if (success) {
-            res.
+            // TODO(wonjohn): Add expire time to this token.
+            var session_token = jwt.encode({
+                id: username,
+            }, app.get('jwtTokenSecret'));
+
+            // make coookies expire in one hour
+            one_hour_ms = 60 * 60 * 1000;
+            res.cookie('name', name, {maxAge: one_hour_ms});
+            res.cookie('session_token', session_token, {maxAge: one_hour_ms});
+            // 1 hour
+            // res.cookie('maxAge', 60 * 60 * 1000);
+            res.redirect('/concatString');
         } else {
             res.send('username or password was wrong.');
         }
     });
 });
 
+app.get('/concatString', function(req, res) {
+    console.log(req.cookies);
+    res.sendFile(__dirname + '/concat_string.html');
+});
 
 var server = app.listen(8081, function () {
   console.log('listening http://127.0.0.1:8081/');
-})
+});
