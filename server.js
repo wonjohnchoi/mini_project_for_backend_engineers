@@ -1,6 +1,14 @@
 var express = require('express');
 var app = express();
 
+// start server
+var server = app.listen(8081, function () {
+  console.log('listening http://127.0.0.1:8081/');
+});
+
+// attach socket.io to server
+var io = require('socket.io')(server);
+
 // bodyparser is used to parse html requests
 var bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -13,11 +21,15 @@ var db = mongojs('localhost:27017/solidware_mini_db', ['users'])
 // jwt is used to create and manage session token
 var jwt = require('jwt-simple');
 // TODO(wonjohn): separate this secret out of git respository.
-app.set('jwtTokenSecret', 'idU093FHeqN2L1MNC7');
+var jwtSecret = 'idU093FHeqN2L1MNC7';
+app.set('jwtTokenSecret', jwtSecret);
 
 // this is used to create and manage cookie
 var cookieParser = require('cookie-parser')
 app.use(cookieParser());
+
+// set the view engine to ejs
+app.set('view engine', 'ejs');
 
 app.get('/', function (req, res) {
     res.sendFile(__dirname + '/index.html');
@@ -47,7 +59,10 @@ login_success = function(username, password, callback) {
 }
 
 app.post('/login', function(req, res){
-    // TODO(wonjohn): handle case in which req.body does not have login or password.
+    if (!('login' in req.body)
+        || !('password' in req.body)) {
+        res.send('incorrect login request');
+    }
     username = req.body['login'];
     password = req.body['password'];
     console.log('POST username: ' + username);
@@ -64,8 +79,6 @@ app.post('/login', function(req, res){
             one_hour_ms = 60 * 60 * 1000;
             res.cookie('name', name, {maxAge: one_hour_ms});
             res.cookie('session_token', session_token, {maxAge: one_hour_ms});
-            // 1 hour
-            // res.cookie('maxAge', 60 * 60 * 1000);
             res.redirect('/concatString');
         } else {
             res.send('username or password was wrong.');
@@ -74,10 +87,28 @@ app.post('/login', function(req, res){
 });
 
 app.get('/concatString', function(req, res) {
-    console.log(req.cookies);
-    res.sendFile(__dirname + '/concat_string.html');
+    console.log('cookies: ' + JSON.stringify(req.cookies));
+    requestConcat = 'string1' in req.query && 'string2' in req.query;
+    res.render('pages/concat_string',{
+        name: req.cookies['name'],
+        session_token: req.cookies['session_token'],
+        string1: req.query['string1'],
+        string2: req.query['string2'],
+        requestConcat: requestConcat});
 });
 
-var server = app.listen(8081, function () {
-  console.log('listening http://127.0.0.1:8081/');
+
+io.on('connection', function (socket) {
+    socket.on('concatString', function(data) {
+        if ('string1' in data
+            && 'string2' in data
+            && 'session_token' in data) {
+            console.log('concatString socket data: ' + JSON.stringify(data));
+            var decoded = jwt.decode(data['session_token'], jwtSecret);
+            console.log('session token decoded: ' + JSON.stringify(decoded));
+
+            res = data['string1'] + data['string2'];
+            socket.emit('concatStringRes', { res: res});
+        }
+    });
 });

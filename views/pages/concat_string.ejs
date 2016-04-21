@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<head>
+  <title>Login</title>
+</head>
+
+<body>
+  <h1>Concat String</h1>
+  Name: <%= name %>
+
+  <form name="input" action="">
+    <p><input type="text" name="string1" value="" placeholder="string 1"></p>
+    <p><input type="text" name="string2" value="" placeholder="string 2"></p>
+    <p class="submit"><input type="submit" name="submit" value="concatString task"></p>
+  </form>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    var socket = io();
+    if (<%= requestConcat %>) {
+      socket.emit('concatString', { string1: '<%= string1 %>', string2: '<%= string2 %>', session_token: '<%= session_token %>'});
+    }
+  </script>
+</body>
+</html>
