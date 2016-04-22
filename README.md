@@ -1,4 +1,4 @@
-This is my implementation of Solidware Mini Project for Back-End engineer candidates.
+This is my implementation of Mini Project for Back-End engineer candidates.
 
 I was given three weeks to implement system specified in mini-project-for-backend-SE.pdf
 
