@@ -43,7 +43,7 @@ client.on('error', function(err) {
 });
 
 client.on('connect', function() {
-    console.log('client connected');
+    console.log('celery client connected');
 });
 
 app.get('/', function (req, res) {
