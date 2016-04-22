@@ -31,6 +31,21 @@ app.use(cookieParser());
 // set the view engine to ejs
 app.set('view engine', 'ejs');
 
+// set up celery message queue
+var celery = require('node-celery'),
+    client = celery.createClient({
+        CELERY_BROKER_URL: 'amqp://guest:guest@localhost:5672//',
+        CELERY_RESULT_BACKEND: 'amqp'
+    });
+
+client.on('error', function(err) {
+    console.log('celery error: ' + JSON.stringify(err));
+});
+
+client.on('connect', function() {
+    console.log('client connected');
+});
+
 app.get('/', function (req, res) {
     res.sendFile(__dirname + '/index.html');
 })
@@ -41,8 +56,8 @@ login_success = function(username, password, callback) {
         if (err != null) {
             console.log('In solidware_mini_db:users, an error occurred:', err);
         } else if (docs != null) {
-            success = false;
-            name = '';
+            var success = false;
+            var name = '';
             docs.forEach(function(doc) {
                 // TODO(wonjohn): in real life, password shouldn't be stored in db
                 // in plain text as in here..
@@ -63,8 +78,8 @@ app.post('/login', function(req, res){
         || !('password' in req.body)) {
         res.send('incorrect login request');
     }
-    username = req.body['login'];
-    password = req.body['password'];
+    var username = req.body['login'];
+    var password = req.body['password'];
     console.log('POST username: ' + username);
     console.log('POST password: ' + password);
 
@@ -88,7 +103,7 @@ app.post('/login', function(req, res){
 
 app.get('/concatString', function(req, res) {
     console.log('cookies: ' + JSON.stringify(req.cookies));
-    requestConcat = 'string1' in req.query && 'string2' in req.query;
+    var requestConcat = 'string1' in req.query && 'string2' in req.query;
     res.render('pages/concat_string',{
         name: req.cookies['name'],
         session_token: req.cookies['session_token'],
@@ -103,12 +118,32 @@ io.on('connection', function (socket) {
         if ('string1' in data
             && 'string2' in data
             && 'session_token' in data) {
-            console.log('concatString socket data: ' + JSON.stringify(data));
-            var decoded = jwt.decode(data['session_token'], jwtSecret);
-            console.log('session token decoded: ' + JSON.stringify(decoded));
+            var string1 = data['string1'];
+            var string2 = data['string2'];
 
-            res = data['string1'] + data['string2'];
-            socket.emit('concatStringRes', { res: res});
+            console.log('concatString socket data: ' + JSON.stringify(data));
+            try {
+                var decoded = jwt.decode(data['session_token'], jwtSecret);
+            } catch(err) {
+                console.log('Failed to decode session token. decode err: ' + JSON.stringify(err));
+            }
+
+            if (decoded != undefined) {
+                console.log('session token decoded: ' + JSON.stringify(decoded));
+                // TODO(wonjohn): check session token expiration time
+                // and reject any expired token
+
+                console.log('client connected');
+                client.call('tasks.concat_string', [string1, string2],
+                            function(result) {
+                                console.log('celery result: ' + JSON.stringify(result));
+                                if ('result' in result) {
+                                    var res = result['result'];
+                                    socket.emit('concatStringRes',
+                                                { concatStringRes : res });
+                                }
+                            });
+            }
         }
     });
 });

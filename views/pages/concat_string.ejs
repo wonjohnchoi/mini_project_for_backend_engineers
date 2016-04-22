@@ -12,6 +12,8 @@
     <p><input type="text" name="string2" value="" placeholder="string 2"></p>
     <p class="submit"><input type="submit" name="submit" value="concatString task"></p>
   </form>
+  Result: <div id="result" style="display: inline"></div>
+
 
   <script src="/socket.io/socket.io.js"></script>
   <script>
@@ -19,6 +21,10 @@
     if (<%= requestConcat %>) {
       socket.emit('concatString', { string1: '<%= string1 %>', string2: '<%= string2 %>', session_token: '<%= session_token %>'});
     }
+    socket.on('concatStringRes', function(data) {
+      console.log('result: ' + data['concatStringRes']);
+      document.getElementById('result').innerHTML = data['concatStringRes'];
+    });
   </script>
 </body>
 </html>

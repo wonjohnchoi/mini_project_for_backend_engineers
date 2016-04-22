@@ -4,6 +4,7 @@
   "description": "Solidware Mini Project for Bankend Engineers",
   "main": "server.js",
   "dependencies": {
+    "amqp": "^0.2.4",
     "body-parser": "^1.15.0",
     "cookie-parser": "^1.4.1",
     "ejs": "^2.4.1",
@@ -13,6 +14,7 @@
     "jwt-simple": "^0.5.0",
     "mongodb": "^2.1.16",
     "mongojs": "^2.3.0",
+    "node-celery": "^0.2.3",
     "socket.io": "^1.4.5"
   },
   "devDependencies": {},
