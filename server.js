@@ -42,10 +42,13 @@ client.on('error', function(err) {
     console.log('celery error: ' + JSON.stringify(err));
 });
 
+var celeryConnected = false;
 client.on('connect', function() {
     console.log('celery client connected');
+    celeryConnected = true;
 });
 
+// main entrance to this website
 app.get('/', function (req, res) {
     res.sendFile(__dirname + '/index.html');
 })
@@ -54,10 +57,14 @@ app.get('/', function (req, res) {
 login_success = function(username, password, callback) {
     db.users.find(function(err, docs) {
         if (err != null) {
+            // This shouldn't really happen.
             console.log('In solidware_mini_db:users, an error occurred:', err);
+            callback(false, "");
         } else if (docs != null) {
             var success = false;
             var name = '';
+            // loop through user info in db to check if there is
+            // a matching username and password.
             docs.forEach(function(doc) {
                 // TODO(wonjohn): in real life, password shouldn't be stored in db
                 // in plain text as in here..
@@ -84,6 +91,9 @@ app.post('/login', function(req, res){
     console.log('POST password: ' + password);
 
     login_success(username, password, function(success, name) {
+        // if login was successful (username and password
+        // was verified from database), add user name (from database)
+        // and session_id to cookie. Then, redirect to /concatString.
         if (success) {
             // TODO(wonjohn): Add expire time to this token.
             var session_token = jwt.encode({
@@ -128,21 +138,28 @@ io.on('connection', function (socket) {
                 console.log('Failed to decode session token. decode err: ' + JSON.stringify(err));
             }
 
+            // If session id is valid,
             if (decoded != undefined) {
                 console.log('session token decoded: ' + JSON.stringify(decoded));
                 // TODO(wonjohn): check session token expiration time
                 // and reject any expired token
 
-                console.log('client connected');
-                client.call('celery_tasks.concat_string', [string1, string2],
-                            function(result) {
-                                console.log('celery result: ' + JSON.stringify(result));
-                                if ('result' in result) {
-                                    var res = result['result'];
-                                    socket.emit('concatStringRes',
-                                                { concatStringRes : res });
-                                }
-                            });
+                // Make sure celery client is connected to rabbit.
+                // If it is not connected, we should abandon this concat request.
+                if (celeryConnected) {
+                    // request celery worker to concat given strings.
+                    client.call('celery_tasks.concat_string', [string1, string2],
+                                function(result) {
+                                    // Once we get result from celery worker,
+                                    // emit the result through socket.
+                                    console.log('celery result: ' + JSON.stringify(result));
+                                    if ('result' in result) {
+                                        var res = result['result'];
+                                        socket.emit('concatStringRes',
+                                                    { concatStringRes : res });
+                                    }
+                                });
+                }
             }
         }
     });
