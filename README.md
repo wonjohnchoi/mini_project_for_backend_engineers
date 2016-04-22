@@ -12,7 +12,7 @@ To run this implementation, please do the followings:
 
     tar -xvzf mini_db.tar.gz # this tar.gz contains mongo database that contains prespecified username and password (wonjohn, test)
 
-    mongod --dbpath smini_db & # this runs mongodb in background or run this in a separate shell without & to monitor its output
+    mongod --dbpath mini_db & # this runs mongodb in background or run this in a separate shell without & to monitor its output
 
     node server.js
 
