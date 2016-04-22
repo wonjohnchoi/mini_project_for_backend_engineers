@@ -16,7 +16,7 @@ app.use(bodyParser.json());
 
 // set up database to store login credential
 var mongojs = require('mongojs')
-var db = mongojs('localhost:27017/solidware_mini_db', ['users'])
+var db = mongojs('localhost:27017/mini_db', ['users'])
 
 // jwt is used to create and manage session token
 var jwt = require('jwt-simple');
@@ -53,12 +53,12 @@ app.get('/', function (req, res) {
     res.sendFile(__dirname + '/index.html');
 })
 
-// check if given username and password pair is stored in solidware_mini_db:users
+// check if given username and password pair is stored in mini_db:users
 login_success = function(username, password, callback) {
     db.users.find(function(err, docs) {
         if (err != null) {
             // This shouldn't really happen.
-            console.log('In solidware_mini_db:users, an error occurred:', err);
+            console.log('In mini_db:users, an error occurred:', err);
             callback(false, "");
         } else if (docs != null) {
             var success = false;

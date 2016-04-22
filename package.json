@@ -1,7 +1,7 @@
 {
-  "name": "solidware_mini_project_for_backend_engineers",
+  "name": "mini_project_for_backend_engineers",
   "version": "1.0.0",
-  "description": "Solidware Mini Project for Bankend Engineers",
+  "description": "Mini Project for Bankend Engineers",
   "main": "server.js",
   "dependencies": {
     "body-parser": "^1.15.0",
