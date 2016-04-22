@@ -4,22 +4,22 @@ I was given three weeks to implement system specified in mini-project-for-backen
 
 To run this implementation, please do the followings:
 
-git clone git@github.com:wonjohnchoi/solidware_mini_project_for_backend_engineers.git
+-git clone git@github.com:wonjohnchoi/solidware_mini_project_for_backend_engineers.git
 
-cd solidware_mini_project_for_backend_engineers/
+-cd solidware_mini_project_for_backend_engineers/
 
-npm install
+-npm install
 
-rabbitmq-server
+-rabbitmq-server
 
-celery -A tasks worker --loglevel=info
+-celery -A celery_tasks worker --loglevel=info
 
-tar -xvzf solidware_mini_db.tar.gz
+-tar -xvzf solidware_mini_db.tar.gz
 
-mongod --dbpath solidware_mini_db
+-mongod --dbpath solidware_mini_db
 
-node server.js
+-node server.js
 
-go to http://127.0.0.1:8081/
+-go to http://127.0.0.1:8081/
 
-login with username: wonjohn, password: test
+-login with username: wonjohn, password: test

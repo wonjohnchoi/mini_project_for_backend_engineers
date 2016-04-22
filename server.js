@@ -134,7 +134,7 @@ io.on('connection', function (socket) {
                 // and reject any expired token
 
                 console.log('client connected');
-                client.call('tasks.concat_string', [string1, string2],
+                client.call('celery_tasks.concat_string', [string1, string2],
                             function(result) {
                                 console.log('celery result: ' + JSON.stringify(result));
                                 if ('result' in result) {
