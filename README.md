@@ -10,13 +10,13 @@ To run this implementation, please do the followings:
 
     npm install
 
-    rabbitmq-server &
+    rabbitmq-server & # this runs rabbitmq server in background or run this in a separate shell without & to monitor its output
 
-    celery -A celery_tasks worker --loglevel=info &
+    celery -A celery_tasks worker --loglevel=info & # this runs stringconcat celery worker in background or run this in a separate shell without & to monitor its output
 
-    tar -xvzf solidware_mini_db.tar.gz
+    tar -xvzf solidware_mini_db.tar.gz # this tar.gz contains mongo database that contains prespecified username and password (wonjohn, test)
 
-    mongod --dbpath solidware_mini_db &
+    mongod --dbpath solidware_mini_db & # this runs mongodb in background or run this in a separate shell without & to monitor its output
 
     node server.js
 
