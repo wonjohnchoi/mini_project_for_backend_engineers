@@ -124,13 +124,18 @@ signup_success = function(name, username, password, callback) {
     // this is a simple propotype.
     // TODO(wonjohn): Also, check if this method can ever fail.
     // In such case, call callback function with false.
-    // TODO(wonjohn): Also, currently we do not check if username,
-    // name, and password are valid. In future, put some restrictions
-    // on them and call callback with falase for invalid inputs.
-    db.users.insert({name: name,
-                username: username,
-                 password: password})
-    callback(true);
+
+    // TODO(wonjohn): make this restriction more strict.
+    if (name == ''
+        || username == ''
+        || password == '') {
+        callback(false);
+    } else {
+        db.users.insert({name: name,
+                         username: username,
+                         password: password})
+        callback(true);
+    }
 }
 
 app.post('/signup', function(req, res){
@@ -150,10 +155,11 @@ app.post('/signup', function(req, res){
         // are successfully added to database), redirect to /
         // so that the user can login.
         if (success) {
-            res.send('signup succeeded! login with your username'
+            res.send('Signup succeeded! login with your username'
                     + ' and password <a href="/">here</a>');
         } else {
-            res.send('signup failed.');
+            res.send('Signup failed. Check that name, username, and '
+                     + 'password are not empty.');
         }
     });
 });
