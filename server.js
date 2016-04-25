@@ -50,7 +50,13 @@ client.on('connect', function() {
 
 // main entrance to this website
 app.get('/', function (req, res) {
-    res.sendFile(__dirname + '/index.html');
+    console.log('cookies: ' + JSON.stringify(req.cookies));
+    // TODO(wonjohn): we should also verify session token if we
+    // want to properly check if user is logged in.
+    var logged_in = 'name' in req.cookies
+        && 'session_token' in req.cookies;
+    res.render('pages/index',{
+        name: req.cookies['name'], logged_in: logged_in});
 })
 
 // check if given username and password pair is stored in mini_db:users
@@ -87,8 +93,8 @@ app.post('/login', function(req, res){
     }
     var username = req.body['login'];
     var password = req.body['password'];
-    console.log('POST username: ' + username);
-    console.log('POST password: ' + password);
+    console.log('POST login username: ' + username);
+    console.log('POST login password: ' + password);
 
     login_success(username, password, function(success, name) {
         // if login was successful (username and password
@@ -109,6 +115,53 @@ app.post('/login', function(req, res){
             res.send('username or password was wrong.');
         }
     });
+});
+
+// add the given username and password pair to database mini_db:users
+signup_success = function(name, username, password, callback) {
+    // TODO(wonjohn): I am sure there is more secure way of managing
+    // and storing in mongodb but will just do this for now because
+    // this is a simple propotype.
+    // TODO(wonjohn): Also, check if this method can ever fail.
+    // In such case, call callback function with false.
+    // TODO(wonjohn): Also, currently we do not check if username,
+    // name, and password are valid. In future, put some restrictions
+    // on them and call callback with falase for invalid inputs.
+    db.users.insert({name: name,
+                username: username,
+                 password: password})
+    callback(true);
+}
+
+app.post('/signup', function(req, res){
+    if (!('login' in req.body)
+        || !('password' in req.body)) {
+        res.send('incorrect signup request');
+    }
+    var name = req.body['name'];
+    var username = req.body['login'];
+    var password = req.body['password'];
+    console.log('POST signup name: ' + name);
+    console.log('POST signup username: ' + username);
+    console.log('POST signup password: ' + password);
+
+    signup_success(name, username, password, function(success) {
+        // if signup was successful (username and password
+        // are successfully added to database), redirect to /
+        // so that the user can login.
+        if (success) {
+            res.send('signup succeeded! login with your username'
+                    + ' and password <a href="/">here</a>');
+        } else {
+            res.send('signup failed.');
+        }
+    });
+});
+
+app.get('/logout', function(req, res){
+    res.clearCookie('session_token');
+    res.clearCookie('name');
+    res.redirect('/');
 });
 
 app.get('/concatString', function(req, res) {

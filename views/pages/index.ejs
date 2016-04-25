@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<head>
+  <title>Login</title>
+</head>
+<body>
+  <% if (logged_in) { %>
+  Hi <%= name %>! You are logged in right now. <br/>
+  Click <a href="/concatString">here</a> to concat some strings! <br/>
+  Click <a href="/logout">here</a> to logout. <br/>
+  <% } else { %>
+  Hi! You are not loggined in right now.
+  <h1>Login</h1>
+  <form method="post" action="/login">
+    <p><input type="text" name="login" value="" placeholder="Username"></p>
+    <p><input type="password" name="password" value="" placeholder="Password"></p>
+    <p class="submit"><input type="submit" name="submit" value="login"></p>
+  </form>
+  <h1>Sign Up</h1>
+  <form method="post" action="/signup">
+    <p><input type="text" name="name" value="" placeholder="Name"></p>
+    <p><input type="text" name="login" value="" placeholder="Username"></p>
+    <p><input type="password" name="password" value="" placeholder="Password"></p>
+    <p class="submit"><input type="submit" name="submit" value="signup"></p>
+  </form>
+  <% } %>
+</body>
+</html>
