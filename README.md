@@ -18,3 +18,4 @@ To run this implementation, please do the followings:
 
 Then, go to http://127.0.0.1:8081/ and login with username: wonjohn, password: test
 
+Demo: http://52.68.118.153:8081/
