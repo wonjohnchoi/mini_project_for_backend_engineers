@@ -10,7 +10,7 @@ To run this implementation, please do the followings:
 
     celery -A celery_tasks worker --loglevel=info & # do this (or do this without & in another shell)
 
-    tar -xvzf mini_db.tar.gz # this tar.gz contains mongo database that contains prespecified username and password (wonjohn, test)
+    mkdir mini_db
 
     mongod --dbpath mini_db & # do this (or do this without & in another shell)
 
